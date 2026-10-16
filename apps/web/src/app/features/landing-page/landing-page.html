@@ -1,0 +1,18 @@
+<section class="hero">
+    <h1>MediTrack</h1>
+    <p class="tagline">Patients and appointments for small clinics, in one place!</p>
+    <div class="actions">
+    @if (auth.isLoggedIn()) {
+        <a routerLink="/patients" class="btn primary">Open patients</a>
+    } @else {
+        <a routerLink="/register" class="btn primary">Create account</a>
+        <a routerLink="/login" class="btn">Sign in</a>
+    }
+    </div>
+</section>
+
+<section class="features">
+    <article><h3>Patients</h3><p>Search, add and update patient records.</p></article>
+    <article><h3>Appointments</h3><p>Book visits and track their status.</p></article>
+    <article><h3>Secure access</h3><p>Staff sign in before seeing any data.</p></article>
+</section>

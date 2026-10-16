@@ -1,1 +1,54 @@
-<p>appointment-list works!</p>
+<div class="page-head">
+    <div>
+        <h1>Appointments</h1>
+        <p class="muted">{{ counts().today }} today · {{ counts().upcoming }} upcoming</p>
+    </div>
+    <div style="margin-top: 1rem;">
+        <a routerLink="/appointments/new" class="btn primary">New appointment</a>
+    </div>
+</div>
+
+<div class="segments" role="tablist">
+    @for (v of views; track v.key) {
+        <button type="button" role="tab" [class.active]="view() === v.key" (click)="view.set(v.key)">
+            {{ v.label }}
+        </button>
+    }
+</div>
+
+@if (loading()) {
+    <div class="card empty">Loading appointments...</div>
+} @else if (error()) {
+    <div class="card empty">{{ error() }}</div>
+} @else {
+    @for (g of groups(); track g.key) {
+        <h2 class="day-head">
+            {{ g.date | date: 'EEEE, MMMM d' }}
+            @if (g.isToday) { <span class="today">Today</span> }
+        </h2>
+        <div class="card list">
+            @for (a of g.items; track a.id) {
+                <div class="row" [class.done]="a.status !== 'scheduled'">
+                    <div class="time">
+                        <strong>{{ a.scheduledAt | date: 'h:mm' }}</strong>
+                        <span>{{ a.scheduledAt | date: 'a'}}</span>
+                    </div>
+                    <div class="who">
+                         <a [routerLink]="['/patients', a.patientId]">{{ a.patient?.lastName }}, {{ a.patient?.firstName }}</a>
+                         <span class="muted">{{ a.reason || 'General visit' }} · {{ a.providerName }} · {{ a.durationMinutes }} min</span>
+                    </div>
+                    <select class="pill" [class]="a.status" [value]="a.status" aria-label="Status"
+                     (change)="changeStatus(a, $any($event.target).value)">
+                        <option value="scheduled">Scheduled</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+            }
+        </div>
+    } @empty {
+        <div class="card empty">
+            No appointments here. <a routerLink="/appointments/new">Book one</a>
+        </div>
+    }
+}

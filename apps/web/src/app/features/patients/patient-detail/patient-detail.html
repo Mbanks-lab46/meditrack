@@ -1,1 +1,105 @@
-<p>patient-detail works!</p>
+<a routerLink="/patients" class="back">← All patients</a>
+
+@if (loading()) {
+    <div class="card skeleton"><div class="sk-avatar"></div><div class="sk-lines"><span></span><span></span></div></div>
+} @else if (error()) {
+    <div class="card empty">{{ error() }}</div>
+} @else if (patient(); as p) {
+
+    <!-- Summary header -->
+    <section class="card header">
+    <div class="avatar" [style.background]="avatarColor()">{{ initials() }}</div>
+    <div class="identity">
+        <h1>{{ p.firstName }} {{ p.lastName }}</h1>
+        <p class="meta">
+        {{ age() }} yrs · {{ p.gender || 'Gender not recorded' }} · Born {{ p.dateOfBirth | date: 'mediumDate' : 'UTC' }}
+        </p>
+        <span class="chip">MRN {{ mrn() }}</span>
+    </div>
+    <div class="actions">
+        <a class="btn primary" routerLink="/appointments/new" [queryParams]="{ patientId: p.id }">Book appointment</a>
+        <a class="btn" [routerLink]="['/patients', p.id, 'edit']">Edit</a>
+        <button type="button" class="btn danger" (click)="remove(p)">Delete</button>
+    </div>
+    </section>
+
+    <!-- Stat tiles -->
+    <section class="stats">
+    <div class="stat"><span class="value">{{ upcoming().length }}</span><span class="label">Upcoming visits</span></div>
+    <div class="stat"><span class="value">{{ completedCount() }}</span><span class="label">Completed visits</span></div>
+    <div class="stat">
+        <span class="value">
+        @if (lastVisit(); as lv) { {{ lv.scheduledAt | date: 'MMM d' }} } @else { — }
+        </span>
+        <span class="label">Last visit</span>
+    </div>
+    </section>
+
+    <!-- Contact + next appointment -->
+    <section class="grid">
+    <div class="card">
+        <h2>Contact</h2>
+        <dl>
+        <div>
+            <dt>Phone</dt>
+            <dd>@if (p.phone) { <a [href]="'tel:' + p.phone">{{ p.phone }}</a> } @else { <span class="muted">Not on file</span> }</dd>
+        </div>
+        <div>
+            <dt>Email</dt>
+            <dd>@if (p.email) { <a [href]="'mailto:' + p.email">{{ p.email }}</a> } @else { <span class="muted">Not on file</span> }</dd>
+        </div>
+        </dl>
+    </div>
+
+    <div class="card next">
+        <h2>Next appointment</h2>
+        @if (next(); as n) {
+        <div class="next-body">
+            <div class="datebox">
+            <span class="mon">{{ n.scheduledAt | date: 'MMM' }}</span>
+            <span class="day">{{ n.scheduledAt | date: 'd' }}</span>
+            </div>
+            <div>
+            <strong>{{ n.reason || 'General visit' }}</strong>
+            <p>{{ n.scheduledAt | date: 'EEEE, h:mm a' }} · {{ n.durationMinutes }} min</p>
+            <p>with {{ n.providerName }}</p>
+            </div>
+        </div>
+        } @else {
+        <p>No upcoming visits.</p>
+        <div class="new-appts-btn">
+            <a class="btn light" routerLink="/appointments/new" [queryParams]="{ patientId: p.id }">Schedule one</a>
+        </div>
+        }
+    </div>
+    </section>
+
+    <!-- Visit history with tabs -->
+    <section class="card">
+    <div class="tabs" role="tablist">
+        <button type="button" role="tab" [class.active]="tab() === 'upcoming'" (click)="tab.set('upcoming')">
+        Upcoming ({{ upcoming().length }})
+        </button>
+        <button type="button" role="tab" [class.active]="tab() === 'past'" (click)="tab.set('past')">
+        Past ({{ past().length }})
+        </button>
+    </div>
+    <ul class="visits">
+        @for (a of visible(); track a.id) {
+        <li class="visit">
+            <div class="datebox">
+            <span class="mon">{{ a.scheduledAt | date: 'MMM' }}</span>
+            <span class="day">{{ a.scheduledAt | date: 'd' }}</span>
+            </div>
+            <div class="info">
+            <strong>{{ a.reason || 'General visit' }}</strong>
+            <span>{{ a.scheduledAt | date: 'EEE, h:mm a' }} · {{ a.durationMinutes }} min · {{ a.providerName }}</span>
+            </div>
+            <span class="pill" [class]="a.status">{{ a.status }}</span>
+        </li>
+        } @empty {
+        <li class="empty">No {{ tab() }} appointments.</li>
+        }
+    </ul>
+    </section>
+}

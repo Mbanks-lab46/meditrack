@@ -2,8 +2,17 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/auth-guard';
 
 export const routes: Routes = [
+    {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () => import('./features/landing-page/landing-page').then((m) => m.LandingPage)
+    },
     { path: 'login', 
         loadComponent: () => import('./features/login/login').then((m) => m.Login)
+    },
+    {
+        path: 'register',
+        loadComponent: () => import('./features/register/register').then((m) => m.Register)
     },
     {
         path: '',

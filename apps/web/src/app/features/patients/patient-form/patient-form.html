@@ -1,1 +1,40 @@
-<p>patient-form works!</p>
+<h1>{{ id() ? 'Edit Patient' : 'New Patient'}}</h1>
+<form [formGroup]="ptForm" (ngSubmit)="save()">
+    <label>
+        First Name
+        <input formControlName="firstName"/>
+    </label>
+    <label>
+        Last Name
+        <input formControlName="lastName"/>
+    </label>
+    <label>
+        Date of Birth
+        <input type="date" formControlName="dateOfBirth"/>
+    </label>
+    <label>
+        Gender
+        <input formControlName="gender"/>
+    </label>
+    <label>
+        Email
+        <input type="email" formControlName="email"/>
+    </label>
+    @if (ptForm.controls.email.invalid && ptForm.controls.email.touched) {
+        <p class="error">Enter a valid email.</p>
+    }
+    <label>
+        Phone
+        <input formControlName="phone"/>
+    </label>
+    @if (error()) { <p class="error">{{ error() }}</p> }
+    <button type="submit" [disabled]="ptForm.invalid || saving()">
+        Save
+    </button>
+    <button>
+        <a routerLink="/patients">
+            Cancel
+        </a>
+    </button>
+    
+</form>

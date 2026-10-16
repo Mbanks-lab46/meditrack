@@ -13,4 +13,5 @@ export class CreatePatientDto {
   @IsDateString() dateOfBirth!: string; // "1990-04-21"
   @IsOptional() @IsString() @MaxLength(20) gender?: string;
   @IsOptional() @IsEmail() email?: string;
+  @IsOptional() @IsString() phone?: string;
 }

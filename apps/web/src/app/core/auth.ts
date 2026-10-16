@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { tap } from 'rxjs';
+import { tap, switchMap, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { LoginResponse, User } from './models/models';
 
@@ -19,16 +19,29 @@ export class AuthService {
   readonly user = signal<User | null>(JSON.parse(localStorage.getItem(USER_KEY) ?? 'null'));
   readonly isLoggedIn = computed(() => this.token() !== null);
 
-  login(email: string, password: string) {
-    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, { email, password })
-    .pipe(
-      tap((res) => {
-        localStorage.setItem(TOKEN_KEY, res.accessToken);
-        localStorage.setItem(USER_KEY, JSON.stringify(res.user));
-        this.token.set(res.accessToken);
-        this.user.set(res.user);
-      }),
-    );
+  login(email: string | null, password: string | null) {
+    return this.http
+      .post<LoginResponse>(`${environment.apiUrl}/auth/login`, { email, password })
+      .pipe(
+        tap((res) => {
+          console.log('login response', res);
+          localStorage.setItem(TOKEN_KEY, res.accessToken);
+          localStorage.setItem(USER_KEY, JSON.stringify(res.user));
+          this.token.set(res.accessToken);
+          this.user.set(res.user);
+        }),
+      );
+  }
+
+  register(fullName: string, email: string, password: string): Observable<LoginResponse> {
+    const body = {
+      fullName,
+      email,
+      password,
+    };
+    return this.http
+      .post<User>(`${environment.apiUrl}/auth/register`, body)
+      .pipe(switchMap(() => this.login(email, password)));
   }
 
   logout() {

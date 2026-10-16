@@ -1,1 +1,45 @@
-<p>patient-list works!</p>
+<div class="row">
+    <h1>Patients</h1>
+    <a routerLink="/patients/new" class="btn"> New Patient</a>
+</div>
+<input type="search" placeholder="Search by name" [value]="search()"
+(input)="onSearch($any($event.target).value)"/>
+@if (loading()) { <p>Loading... </p> }
+@if (error()) { <p class="error">{{ error() }}</p> }
+<table>
+    <thead>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Date of Birth
+            </th>
+            <th>
+                Phone
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (p of patients(); track p.id) {
+            <tr>
+                <td>
+                    <a [routerLink]="['/patients', p.id]">
+                        {{ p.lastName }},
+                        {{ p.firstName }}
+                    </a>
+                </td>
+                <td>
+                    {{ p.dateOfBirth | date: 'mediumDate'}}
+                </td>
+                <td>
+                    {{ p.phone ?? '-' }}
+                </td>
+            </tr>
+        } @empty {
+            <tr>
+                <td colspan="3">No patients yet!</td>
+            </tr>
+        }
+    </tbody>
+</table>
