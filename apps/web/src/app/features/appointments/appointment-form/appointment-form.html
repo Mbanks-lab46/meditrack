@@ -1,1 +1,66 @@
-<p>appointment-form works!</p>
+<a routerLink="/appointments" class="back">← Appointments</a>
+<h1>Book Appointments!</h1>
+
+<form [formGroup]="apptsForm" (ngSubmit)="save()">
+    <label>
+        Patient
+        <select formControlName="patientId">
+            <option [ngValue]="0" disabled>Select a patient...</option>
+            @for (p of patients(); track p.id) {
+                <option [ngValue]="p.id">{{ p.lastName }}, {{ p.firstName }}</option>
+            }
+        </select>
+    </label>
+
+    @if (selectedPatient(); as sp) {
+        <div class="patient-summary">
+            <span class="initials">{{ sp.firstName[0]}}{{ sp.lastName[0] }}</span>
+            <div>
+                <strong>{{ sp.firstName }} {{ sp.lastName }}</strong>
+                <span class="muted">Born {{sp.dateOfBirth | date : 'mediumDate' : 'UTC'}}</span>
+            </div>
+        </div>
+    }
+
+    <label>
+        Date and time
+        <input type="datetime-local" formControlName="scheduledAt" [min]="minDate"/>
+    </label>
+    @if (apptsForm.controls.schedulerAt.hasError('past')) {
+        <p class="error">Pick a time in the future.</p>
+    }
+
+    <fieldset>
+        <legend>Length</legend>
+        <div class="chips">
+            @for (d of durations; track d) {
+                <button type="button" class="chip" [class.active]="apptsForm.controls.durationMinutes.value === d"
+                (click)="apptsForm.controls.durationMinutes.setValue(d)">
+                    {{ d }} min
+                </button>
+            }
+        </div>
+    </fieldset>
+
+    <label>
+        Provider
+        <input formControlName="providerName" placeholder="e.g. Dr. Jackson" />
+    </label>
+
+    <label>
+        Reason for visit
+        <span class="muted">(optional)</span>
+        <textarea formControlName="reason" rows="3" placeholder="Annual checkup, follow up, lab review..."></textarea>
+    </label>
+
+    @if (error()) { 
+        <p class="error">{{ error() }}</p>
+    }
+
+    <div class="form-actions">
+        <a class="btn" routerLink="/appointments">Cancel</a>
+        <button type="submit" class="btn primary" [disabled]="apptsForm.invalid || saving()">
+            {{ saving() ? 'Booking...' : 'Book Appointment'}}
+        </button>
+    </div>
+</form>
